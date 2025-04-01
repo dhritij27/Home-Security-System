@@ -91,6 +91,10 @@ Dhanush Rao Kona: PES1UG23CS182
 Dhanya P Bhat: PES1UG23CS183
 Dhriti Jamadagni: PES1UG23CS185
 
+##Simulation
+![image](https://github.com/user-attachments/assets/ed6bd880-1b33-47b1-90e4-dbfa7817671a)
+
+
 
 ## License
 
