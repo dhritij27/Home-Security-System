@@ -85,9 +85,12 @@ The system monitors motion in four zones (front, back, left, right) using four P
   - Notifications alert you to motion events.  
 - The buzzer will sound whenever a PIR sensor detects movement.
 
-## Contributing
+## Contributors 
+Project Contributors
+Dhanush Rao Kona: PES1UG23CS182
+Dhanya P Bhat: PES1UG23CS183
+Dhriti Jamadagni: PES1UG23CS185
 
-This is a college project, but feel free to fork and adapt it! Submit pull requests or open issues for suggestions.
 
 ## License
 
