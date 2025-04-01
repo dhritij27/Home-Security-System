@@ -1,0 +1,108 @@
+#define BLYNK_TEMPLATE_ID "YOUR_TEMPLATE_ID"  // Replace with your Blynk Template ID
+#define BLYNK_TEMPLATE_NAME "Home Security"
+#define BLYNK_AUTH_TOKEN "YOUR_AUTH_TOKEN"    // Replace with your Blynk Auth Token
+
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+#include <DHT.h>
+
+// Wi-Fi credentials
+char ssid[] = "YOUR_WIFI_SSID";       // Replace with your Wi-Fi SSID
+char pass[] = "YOUR_WIFI_PASSWORD";   // Replace with your Wi-Fi password
+
+// Pin definitions
+#define PIR_FRONT D1  // PIR sensor for front
+#define PIR_BACK D2   // PIR sensor for back
+#define PIR_LEFT D5   // PIR sensor for left
+#define PIR_RIGHT D6  // PIR sensor for right
+#define LDR_PIN A0    // LDR sensor (analog pin)
+#define DHT_PIN D7    // Temperature sensor (DHT11)
+#define BUZZER D8     // Active buzzer
+
+// DHT sensor setup
+#define DHTTYPE DHT11
+DHT dht(DHT_PIN, DHTTYPE);
+
+// Blynk virtual pins (as per your setup)
+#define VPIN_PIR_FRONT V1
+#define VPIN_PIR_BACK V2
+#define VPIN_PIR_LEFT V3
+#define VPIN_PIR_RIGHT V4
+#define VPIN_LDR V5
+#define VPIN_TEMP V6
+
+// Variables to store sensor states
+int pirFrontState = 0;
+int pirBackState = 0;
+int pirLeftState = 0;
+int pirRightState = 0;
+int ldrValue = 0;
+float temperature = 0.0;
+
+void setup() {
+  // Initialize serial communication for debugging
+  Serial.begin(115200);
+
+  // Initialize pins
+  pinMode(PIR_FRONT, INPUT);
+  pinMode(PIR_BACK, INPUT);
+  pinMode(PIR_LEFT, INPUT);
+  pinMode(PIR_RIGHT, INPUT);
+  pinMode(LDR_PIN, INPUT);
+  pinMode(BUZZER, OUTPUT);
+  digitalWrite(BUZZER, LOW);  // Buzzer off initially
+
+  // Initialize DHT sensor
+  dht.begin();
+
+  // Connect to Wi-Fi and Blynk
+  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
+}
+
+void loop() {
+  Blynk.run();  // Run Blynk
+
+  // Read PIR sensors
+  pirFrontState = digitalRead(PIR_FRONT);
+  pirBackState = digitalRead(PIR_BACK);
+  pirLeftState = digitalRead(PIR_LEFT);
+  pirRightState = digitalRead(PIR_RIGHT);
+
+  // Read LDR sensor (0-1023 range, map to 0-100 for simplicity)
+  ldrValue = analogRead(LDR_PIN);
+  ldrValue = map(ldrValue, 0, 1023, 0, 100);  // Convert to percentage
+
+  // Read temperature from DHT11
+  temperature = dht.readTemperature();
+  if (isnan(temperature)) {
+    Serial.println("Failed to read from DHT sensor!");
+    temperature = 0.0;  // Default value if reading fails
+  }
+
+  // Send data to Blynk
+  Blynk.virtualWrite(VPIN_PIR_FRONT, pirFrontState);
+  Blynk.virtualWrite(VPIN_PIR_BACK, pirBackState);
+  Blynk.virtualWrite(VPIN_PIR_LEFT, pirLeftState);
+  Blynk.virtualWrite(VPIN_PIR_RIGHT, pirRightState);
+  Blynk.virtualWrite(VPIN_LDR, ldrValue);
+  Blynk.virtualWrite(VPIN_TEMP, temperature);
+
+  // Trigger buzzer if any PIR detects motion
+  if (pirFrontState == HIGH || pirBackState == HIGH || pirLeftState == HIGH || pirRightState == HIGH) {
+    digitalWrite(BUZZER, HIGH);  // Turn on buzzer
+    Blynk.notify("Motion Detected!");  // Send notification via Blynk
+  } else {
+    digitalWrite(BUZZER, LOW);  // Turn off buzzer
+  }
+
+  // Print sensor values to Serial Monitor for debugging
+  Serial.print("PIR Front: "); Serial.print(pirFrontState);
+  Serial.print(" | PIR Back: "); Serial.print(pirBackState);
+  Serial.print(" | PIR Left: "); Serial.print(pirLeftState);
+  Serial.print(" | PIR Right: "); Serial.print(pirRightState);
+  Serial.print(" | LDR: "); Serial.print(ldrValue);
+  Serial.print(" | Temp: "); Serial.print(temperature);
+  Serial.println(" °C");
+
+  delay(1000);  // Update every second
+}
