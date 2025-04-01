@@ -91,7 +91,7 @@ This is a college project, but feel free to fork and adapt it! Submit pull reque
 
 ## License
 
-This project is licensed under the Apache 2.0 License 
+This project is licensed under the [Apache 2.0 License](Apache 2.0 License)
 
 ---
 
